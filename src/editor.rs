@@ -102,6 +102,7 @@ impl Editor {
         }
     }
     fn move_cursor(&mut self, key: Key) {
+        let terninal_height = self.terminal.size().height as usize;
         let Position {mut y, mut x} = self.cursor_position;
         let size = self.terminal.size();
         let height = self.document.len();
@@ -112,6 +113,7 @@ impl Editor {
         };
         match key {
             Key::Up => y = y.saturating_sub(1),
+            
             Key::Down => {
                 if y < height { 
                     y = y.saturating_add(1);
@@ -123,8 +125,20 @@ impl Editor {
                     x = x.saturating_add(1);
                 }
             }
-            Key::PageUp => y = 0,
-            Key::PageDown => y = height,
+            Key::PageUp => {
+                y = if y > terninal_height {
+                    y - terninal_height
+                } else {
+                    0
+                }
+            }
+            Key::PageDown => {
+                y = if y.saturating_add(terninal_height) < height {
+                    y + terninal_height as usize
+                } else {
+                    height
+                }
+            }
             Key::Home => x = 0,
             Key::End => x = width,
             _ => (),
